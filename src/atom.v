@@ -263,7 +263,11 @@ module atom
             cas_div <= cas_div + 1;
        end
 
+`ifdef use_sid
    assign sound = pia_pc[2] & sid_audio;
+`else
+   assign sound = 1'b0;
+`endif
 
    // this is a direct translation of the logic in the atom
    // (two NAND gates and an inverter)
@@ -394,6 +398,7 @@ module atom
    // SID
    // ===============================================================
 
+`ifdef use_sid
    wire [7:0] sid_dout;
    wire       sid_audio;
    wire       sid_cs;
@@ -416,6 +421,7 @@ module atom
       .audio_out(sid_audio),
       .audio_data()
    );
+`endif
 
    // ===============================================================
    // 8255 PIA at 0xB0xx
@@ -532,7 +538,9 @@ module atom
    wire         pl8_cs = (address[15: 4] == 12'hb40);
    wire         via_cs = (address[15: 4] == 12'hb80);
    wire         spi_cs = (address[15: 4] == 12'hbc0);
+`ifdef use_sid
    assign       sid_cs = (address[15: 8] ==  8'hbd);
+`endif
    assign      a000_cs = (address[15:12] == 4'b1010);
    wire         vid_cs = (address[15:12] == 4'b1000) | (address[15:11] == 5'b10010);
    assign rom_latch_cs = (address        == 16'hbfff);
@@ -544,7 +552,9 @@ module atom
                     pl8_cs   ? pl8_dout  :
                     spi_cs   ? spi_dout  :
                     via_cs   ? via_dout  :
+`ifdef use_sid
                     sid_cs   ? sid_dout  :
+`endif
               rom_latch_cs   ? rom_latch :
                                data_pins_in;
 
